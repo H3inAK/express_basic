@@ -8,7 +8,7 @@ const mongoose = require('mongoose');
 const morgan = require('morgan');
 
 const chatController = require('./controllers/aichatController');
-const { getTask, getAllTasks, createTask, patchTask, putTask, deleteTask } = require('./controllers/tasksControllers');
+const { getTask, getAllTasks, createTasks, createTask, patchTask, putTask, deleteTask } = require('./controllers/tasksControllers');
 const HttpStatusCode = require('./utils/httpStatusCodes');
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./utils/globalErrorHandler');
@@ -42,6 +42,9 @@ app.get('/api/v1/tasks', getAllTasks);
 
 // get individual task
 app.get('/api/v1/tasks/:id/:dest?/:place?', getTask);
+
+// create tasks
+app.post('/api/v1/tasks', createTasks);
 
 // create a task
 app.post('/api/v1/tasks/', createTask);

@@ -1,4 +1,5 @@
 const HttpStatusCode = require('../utils/httpStatusCodes');
+const AppError = require('../utils/appError');
 
 const sentErrorDev = (err, req, res) => {
     err.statusCode = err.statusCode || HttpStatusCode.INTERNAL_SERVER_ERROR;

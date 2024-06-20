@@ -35,14 +35,31 @@ const tasks = [
 
 // read all tasks
 const getAllTasks = async (req, res) => {
-    try {       
-        const query = Task.find();  
+    try { 
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5;
+        const skip = (page - 1) * limit;
+        
+        const query = Task.find().skip(skip).limit(limit);  
         const results = await query.select('-__v');
+        const total = await Task.countDocuments();
+        const totalPages = Math.ceil(total / limit);
+        const currentPage = page;
+
+        if (page > totalPages) {
+            return res.status(HttpStatusCode.BAD_REQUEST).json({
+                status: 'fail',
+                message: 'Page not found'
+            });
+        }
     
         res.status(HttpStatusCode.OK).json({
             status: 'success',
             requestTime: req.requestTime,
             results: results.length,
+            total: total,
+            totalPages: totalPages,
+            currentPage: currentPage,
             data: {
                 tasks: results
             }
@@ -75,6 +92,25 @@ const getTask = catchAsync (async (req, res, next) => {
         
     // }
 });
+
+// create tasks
+const createTasks = async (req, res, next) => {
+    try {
+        const tasks = req.body;
+        const newTasks = await Task.create(tasks);
+        res.status(HttpStatusCode.CREATED).json({
+            status: 'success',
+            requestTime: req.requestTime,
+            results: newTasks.length,
+            data:{
+                tasks: newTasks
+            },
+        });
+    } catch (error) {
+        const err = new AppError(error, HttpStatusCode.BAD_REQUEST);
+        next(err);
+    }
+}
 
 // create a task
 const createTask = async (req, res, next) => {
@@ -177,6 +213,7 @@ const deleteTask = catchAsync(async (req, res) => {
 module.exports = {
     getAllTasks,
     getTask,
+    createTasks,
     createTask,
     patchTask,
     putTask,
